@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <title>mybatis-helper</title>
+    <!-- Required meta tags -->
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="prism/prism.css" />
+    <style>
+        select {
+            width: 70%;
+        }
+
+        .row {
+            margin: 10px;
+        }
+    </style>
+</head>
+<body>
+<h1 align="center">mybatis-helper</h1>
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-4">
+            <span>数据库：</span>
+            <select id="database_selector" onchange="fillUpTables()">
+                <option value="">--请选择--</option>
+                <option th:each="database : ${databases}"
+                        th:value="${database}"
+                        th:text="${database}">mysql</option>
+            </select>
+        </div>
+    </div>
+    <div class="row justify-content-center">
+        <div class="col-4">
+            <span>数据表：</span>
+            <select id="tables_selector" onchange="queryText()">
+            </select>
+        </div>
+    </div>
+    <div class="row justify-content-center">
+        <div class="col-4">
+            <span>目标体：</span>
+            <select id="target_selector" onchange="queryText()">
+                <option value="bean">bean</option>
+                <option value="sql">sql</option>
+            </select>
+        </div>
+    </div>
+    <div class="row justify-content-center">
+        <pre style="width: 50%; min-height:500px;">
+            <code class="language-java"></code>
+        </pre>
+    </div>
+</div>
+
+
+
+<!-- Optional JavaScript -->
+<!-- jQuery first, then Popper.js, then Bootstrap JS -->
+<script src="jquery/jquery-3.2.1.min.js" ></script>
+<script src="popper/umd/popper.min.js"></script>
+<script src="bootstrap/js/bootstrap.min.js"></script>
+<script src="prism/prism.js"></script>
+<script>
+    function fillUpTables() {
+        $("#tables_selector").empty();
+        var database = $("#database_selector").val();
+        if(database !== '') {
+            $.get("databases/" + database + "/tables", function(data){
+                var tables = data;
+                for (index in tables) {
+                    $("#tables_selector").append('<option value="' + tables[index] + '">' + tables[index] + '</option>');
+                }
+                var table = $("#tables_selector").val();
+                if(table != null) {
+                    $("#tables_selector").trigger("onchange")
+                }
+            })
+        }
+    }
+
+    function queryText() {
+        var database = $("#database_selector").val();
+        var table = $("#tables_selector").val();
+        var target = $("#target_selector").val();
+        $.get("databases/" + database + "/tables/" + table + "/" + target, function(data){
+            $("code").text(data);
+        })
+    }
+</script>
+</body>
+</html>
